@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { User } from '../users/user.entity';
 import { OrderItem } from './order-item.entity';
+import { OrderStatusLog } from './order-status-log.entity';
 
 export enum OrderStatus {
   DRAFT = 'draft',
@@ -70,4 +71,7 @@ export class Order {
 
   @OneToMany(() => OrderItem, (item) => item.order)
   items: OrderItem[];
+
+  @OneToMany(() => OrderStatusLog, (log) => log.order)
+  statusLogs: OrderStatusLog[];
 }

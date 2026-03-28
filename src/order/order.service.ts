@@ -3,15 +3,28 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus, OrderType } from './order.entity';
 import { OrderItem, OrderItemStatus } from './order-item.entity';
+import { OrderStatusLog } from './order-status-log.entity';
+import { NotFoundException } from '@nestjs/common'; 
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
-    @InjectRepository(OrderItem)
-    private orderItemRepository: Repository<OrderItem>,
-  ) {}
+  @InjectRepository(Order)
+  private orderRepository: Repository<Order>,
+  @InjectRepository(OrderItem)
+  private orderItemRepository: Repository<OrderItem>,
+  @InjectRepository(OrderStatusLog)
+  private statusLogRepository: Repository<OrderStatusLog>,
+) {}
+
+private async logStatusChange(orderId: number, status: string, message?: string) {
+  const log = this.statusLogRepository.create({
+    orderId,
+    status,
+    message,
+  });
+  return this.statusLogRepository.save(log);
+}
 
   async createOrder(userId: number, orderData: Partial<Order>) {
     const order = this.orderRepository.create({
@@ -50,16 +63,48 @@ export class OrderService {
     });
   }
 
-  async updateOrderStatus(orderId: number, userId: number, status: OrderStatus) {
-    await this.orderRepository.update({ id: orderId, userId }, { status });
-    return this.orderRepository.findOne({ where: { id: orderId, userId } });
-  }
+  async updateOrderStatus(orderId: number, userId: number, status: OrderStatus, message?: string) {
+  const order = await this.orderRepository.findOne({ where: { id: orderId, userId } });
+  if (!order) throw new Error('Order not found');
+  
+  await this.orderRepository.update({ id: orderId, userId }, { status });
+  
+  // Create status log
+  await this.logStatusChange(orderId, status, message);
+  
+  return this.orderRepository.findOne({ where: { id: orderId, userId } });
+}
 
   async submitOrder(orderId: number, userId: number) {
-    await this.orderRepository.update(
-      { id: orderId, userId, status: OrderStatus.DRAFT },
-      { status: OrderStatus.SUBMITTED },
-    );
-    return this.orderRepository.findOne({ where: { id: orderId, userId } });
-  }
+  const order = await this.orderRepository.findOne({ where: { id: orderId, userId } });
+  if (!order) throw new Error('Order not found');
+  if (order.status !== OrderStatus.DRAFT) throw new Error('Order already submitted');
+  
+  await this.orderRepository.update(
+    { id: orderId, userId },
+    { status: OrderStatus.SUBMITTED }
+  );
+  
+  // Create status log
+  await this.logStatusChange(orderId, OrderStatus.SUBMITTED, 'Order submitted by user');
+  
+  return this.orderRepository.findOne({ where: { id: orderId, userId } });
+}
+
+async getOrderTimeline(orderId: number, userId: number) {
+  // First verify order belongs to user
+  const order = await this.orderRepository.findOne({ where: { id: orderId, userId } });
+  if (!order) throw new NotFoundException('Order not found');
+  
+  const logs = await this.statusLogRepository.find({
+    where: { orderId },
+    order: { createdAt: 'ASC' },
+  });
+  
+  return logs.map(log => ({
+    status: log.status,
+    message: log.message,
+    timestamp: log.createdAt,
+  }));
+}
 }

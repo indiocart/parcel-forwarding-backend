@@ -35,4 +35,9 @@ export class OrderController {
   submit(@Request() req, @Param('orderId') orderId: number) {
     return this.orderService.submitOrder(orderId, req.user.userId);
   }
+
+  @Get(':orderId/timeline')
+  getTimeline(@Request() req, @Param('orderId') orderId: number) {
+    return this.orderService.getOrderTimeline(orderId, req.user.userId);
+  }
 }
