@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Up
 import { User } from '../users/user.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatusLog } from './order-status-log.entity';
+import { Payment } from '../payment/payment.entity';
 
 export enum OrderStatus {
   DRAFT = 'draft',
@@ -74,4 +75,7 @@ export class Order {
 
   @OneToMany(() => OrderStatusLog, (log) => log.order)
   statusLogs: OrderStatusLog[];
+
+  @OneToMany(() => Payment, (payment) => payment.order)
+  payments: Payment[];
 }

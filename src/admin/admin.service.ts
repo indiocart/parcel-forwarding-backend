@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Order, OrderStatus } from '../order/order.entity';
 import { OrderItem } from '../order/order-item.entity';
 import { OrderStatusLog } from '../order/order-status-log.entity';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class AdminService {
@@ -14,6 +15,7 @@ export class AdminService {
     private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(OrderStatusLog)
     private statusLogRepository: Repository<OrderStatusLog>,
+    private paymentService: PaymentService,
   ) {}
 
   async getAllOrders() {
@@ -53,4 +55,8 @@ export class AdminService {
       .select('DISTINCT "userId"')
       .getRawMany();
   }
+
+  async completePayment(paymentId: number, transactionReference: string) {
+  return this.paymentService.markPaymentCompleted(paymentId, transactionReference);
+}
 }

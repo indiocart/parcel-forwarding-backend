@@ -7,9 +7,10 @@ import { UsersModule } from '../users/users.module';
 import { Order } from '../order/order.entity';
 import { OrderItem } from '../order/order-item.entity';
 import { OrderStatusLog } from '../order/order-status-log.entity';
+import { PaymentModule } from '../payment/payment.module'; 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderItem, OrderStatusLog]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Order, OrderItem, OrderStatusLog]), UsersModule,  PaymentModule],
   providers: [AdminService, AdminGuard],
   controllers: [AdminController],
   exports: [AdminGuard],

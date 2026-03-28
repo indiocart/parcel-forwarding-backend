@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { AddressModule } from './address/address.module';
 import { OrderModule } from './order/order.module';
 import { AdminModule } from './admin/admin.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AdminModule } from './admin/admin.module';
   AddressModule,
   OrderModule,
   AdminModule,
+  PaymentModule,
 ],
   controllers: [AppController],
   providers: [AppService],

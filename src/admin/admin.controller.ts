@@ -26,4 +26,12 @@ export class AdminController {
   ) {
     return this.adminService.updateOrderStatus(orderId, status as any, message);
   }
+
+    @Put('payments/:paymentId/complete')
+  completePayment(
+    @Param('paymentId') paymentId: number,
+    @Body('transactionReference') transactionReference: string,
+  ) {
+    return this.adminService.completePayment(paymentId, transactionReference);
+  }
 }
