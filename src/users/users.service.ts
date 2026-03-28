@@ -30,4 +30,8 @@ async findByEmail(email: string) {
   return this.usersRepository.findOne({ where: { email } });
 }
 
+async findById(id: number) {
+  return this.usersRepository.findOne({ where: { id } });
+}
+
 }
