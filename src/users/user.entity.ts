@@ -1,4 +1,5 @@
 import { OneToMany } from 'typeorm';
+import { Order } from '../order/order.entity';
 import { Address } from '../address/address.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
@@ -24,4 +25,7 @@ export class User {
 
   @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
