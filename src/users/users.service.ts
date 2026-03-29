@@ -12,15 +12,12 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async createUser(fullName: string, email: string, password: string) {
-
-  // hash password before saving
-  const hashedPassword = await bcrypt.hash(password, 10);
-
+async createUser(fullName: string, email: string, password: string) {
+  // DO NOT hash here - password is already hashed by AuthService
   const user = this.usersRepository.create({
     fullName,
     email,
-    password: hashedPassword,
+    password, // Use the password as-is (already hashed)
   });
 
   return this.usersRepository.save(user);

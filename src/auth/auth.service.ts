@@ -17,17 +17,25 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
+  console.log('🔵 Login attempt for email:', email);
+  
+  const user = await this.usersService.findByEmail(email);
+  console.log('🔵 User found:', user ? 'Yes' : 'No');
 
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+  if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+  console.log('🔵 Stored password hash:', user.password);
+  console.log('🔵 Comparing with password:', password);
+  
+  const isMatch = await bcrypt.compare(password, user.password);
+  console.log('🔵 Password match:', isMatch);
+  
+  if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = { userId: user.id, email: user.email };
+  const payload = { userId: user.id, email: user.email };
 
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+  return {
+    access_token: this.jwtService.sign(payload),
+  };
+}
 }
