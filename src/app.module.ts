@@ -8,6 +8,7 @@ import { AddressModule } from './address/address.module';
 import { OrderModule } from './order/order.module';
 import { AdminModule } from './admin/admin.module';
 import { PaymentModule } from './payment/payment.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PaymentModule } from './payment/payment.module';
   OrderModule,
   AdminModule,
   PaymentModule,
+  UploadModule,
 ],
   controllers: [AppController],
   providers: [AppService],
