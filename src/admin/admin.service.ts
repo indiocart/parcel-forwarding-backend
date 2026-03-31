@@ -5,6 +5,7 @@ import { Order, OrderStatus } from '../order/order.entity';
 import { OrderItem } from '../order/order-item.entity';
 import { OrderStatusLog } from '../order/order-status-log.entity';
 import { PaymentService } from '../payment/payment.service';
+import { OrderService } from '../order/order.service';
 
 @Injectable()
 export class AdminService {
@@ -16,6 +17,7 @@ export class AdminService {
     @InjectRepository(OrderStatusLog)
     private statusLogRepository: Repository<OrderStatusLog>,
     private paymentService: PaymentService,
+    private orderService: OrderService,
   ) {}
 
   async getAllOrders() {
@@ -33,21 +35,41 @@ export class AdminService {
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus, message?: string) {
-  await this.orderRepository.update({ id: orderId }, { status });
-  
-  // Create status log
-  const log = this.statusLogRepository.create({
-    orderId,
-    status,
-    message: message || `Status changed to ${status} by admin`,
-  });
-  await this.statusLogRepository.save(log);
-  
-  return this.orderRepository.findOne({
-    where: { id: orderId },
-    relations: ['user', 'items'],
-  });
-}
+    console.log('🔵 AdminService.updateOrderStatus called with:', { orderId, status, message });
+    
+    // Get the order first
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    if (!order) {
+      throw new Error(`Order ${orderId} not found`);
+    }
+    
+    console.log('🔵 Current order status:', order.status);
+    console.log('🔵 New status:', status);
+    
+    // Update order status
+    await this.orderRepository.update({ id: orderId }, { status });
+    
+    // Create status log
+    const log = this.statusLogRepository.create({
+      orderId,
+      status,
+      message: message || `Status changed to ${status} by admin`,
+    });
+    await this.statusLogRepository.save(log);
+    
+    console.log('✅ Status updated and log created');
+    
+    // Return updated order with relations
+    return this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['user', 'items'],
+    });
+  }
+
+  async togglePaymentStatus(orderId: number, paymentStatus: boolean) {
+    await this.orderRepository.update({ id: orderId }, { paymentStatus });
+    return this.orderRepository.findOne({ where: { id: orderId } });
+  }
 
   async getAllUsers() {
     return this.orderRepository
@@ -57,6 +79,6 @@ export class AdminService {
   }
 
   async completePayment(paymentId: number, transactionReference: string) {
-  return this.paymentService.markPaymentCompleted(paymentId, transactionReference);
-}
+    return this.paymentService.markPaymentCompleted(paymentId, transactionReference);
+  }
 }

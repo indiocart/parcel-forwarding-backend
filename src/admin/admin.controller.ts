@@ -19,15 +19,26 @@ export class AdminController {
   }
 
   @Put('orders/:orderId/status')
-  updateOrderStatus(
+  async updateOrderStatus(
     @Param('orderId') orderId: number,
     @Body('status') status: string,
     @Body('message') message?: string,
   ) {
-    return this.adminService.updateOrderStatus(orderId, status as any, message);
+    console.log('🔵 AdminController.updateOrderStatus called:', { orderId, status, message });
+    const result = await this.adminService.updateOrderStatus(orderId, status as any, message);
+    console.log('✅ AdminController.updateOrderStatus result:', result);
+    return result;
   }
 
-    @Put('payments/:paymentId/complete')
+  @Put('orders/:orderId/payment')
+  togglePayment(
+    @Param('orderId') orderId: number,
+    @Body('paymentStatus') paymentStatus: boolean,
+  ) {
+    return this.adminService.togglePaymentStatus(orderId, paymentStatus);
+  }
+
+  @Put('payments/:paymentId/complete')
   completePayment(
     @Param('paymentId') paymentId: number,
     @Body('transactionReference') transactionReference: string,

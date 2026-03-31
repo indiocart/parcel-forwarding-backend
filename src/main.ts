@@ -7,8 +7,10 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: frontendUrl,
     credentials: true,
   });
   
@@ -19,7 +21,8 @@ async function bootstrap() {
   
   app.useGlobalPipes(new ValidationPipe());
   
-  await app.listen(3001);
-  console.log('Backend running on http://localhost:3001');
+  const port = parseInt(process.env.PORT || '3001');
+  await app.listen(port);
+  console.log(`Backend running on http://localhost:${port}`);
 }
 bootstrap();
